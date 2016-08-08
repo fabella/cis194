@@ -17,36 +17,44 @@ fun2 n | even n    = n + fun2 (n `div` 2)
 fun2' :: Integer -> Integer
 fun2' = sum . filter even . takeWhile (/=1) . iterate (\x -> if even x then (x `div` 2) else (3 * x + 1))
 
+--------------------------------------------------------------------------------------
+-- ***********************************************************************************
+--------------------------------------------------------------------------------------
 -- Exercise 2: Folding with trees
 data Tree a = Leaf
-            | Node (Tree a) a (Tree a)
+            | Node Integer (Tree a) a (Tree a)
   deriving (Show, Eq)
 
-foldTree :: [a] -> Tree a
-foldTree xs = Leaf
+foldTree :: (Eq a) => [a] -> Tree a
+foldTree xs = foldr insert Leaf xs
+
+insert :: (Eq a) => a -> Tree a -> Tree a
+insert a Leaf = Node 0 Leaf a Leaf
+insert a (Node h l b r)
+   | a == b                  = Node h l b r
+   | (height l) < (height r) = (Node (h+1) (insert a l) b r)
+   | otherwise               = (Node (h+1) l b (insert a r))
 
 height :: Tree a -> Integer
-height Leaf               = 0
-height (Node Leaf _ Leaf) = 0
-height (Node l _ r)       = 1 + max (height l) (height r)
-
-height' :: Tree a -> Integer
-height' Leaf         = 0
-height' (Node l _ r) = 1 + max (height' l) (height' r)
+height Leaf           = -1
+height (Node h _ _ _) = h
 
 isBalance :: Tree a -> Bool
 isBalance Leaf         = True
-isBalance (Node l _ r) = diff <= 1 && isBalance l && isBalance r
-    where diff = abs (height' l - height' r)
+isBalance (Node _ l _ r) = diff <= 1 && isBalance l && isBalance r
+    where diff = abs (height l - height r)
 
 right :: Tree a -> Tree a
 right Leaf         = Leaf
-right (Node _ _ r) = r
+right (Node _ _ _ r) = r
 
 left :: Tree a -> Tree a
 left Leaf         = Leaf
-left (Node l _ _) = l
+left (Node _ l _ _) = l
 
+--------------------------------------------------------------------------------------
+-- ***********************************************************************************
+--------------------------------------------------------------------------------------
 -- Exercise 3: More folds!
 xor :: [Bool] -> Bool
 xor = odd . length . filter (==True)
@@ -59,7 +67,9 @@ map' f = foldr (\x acc -> (f x) : acc) []
 -- (Optional) implement foldl using foldr
 -- myFoldl :: (a -> b -> a) -> a -> [b] -> a
 -- myFoldl f base xs = foldr f base xs
---
+--------------------------------------------------------------------------------------
+-- ***********************************************************************************
+--------------------------------------------------------------------------------------
 -- Exercise 04: Finding primes
 sieveSundaram :: Integer -> [Integer]
 sieveSundaram n = [1..n]
