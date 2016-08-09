@@ -65,14 +65,16 @@ map' :: (a -> b) -> [a] -> [b]
 map' f = foldr (\x acc -> (f x) : acc) []
 
 -- (Optional) implement foldl using foldr
--- myFoldl :: (a -> b -> a) -> a -> [b] -> a
--- myFoldl f base xs = foldr f base xs
+myFoldl :: (a -> b -> a) -> a -> [b] -> a
+myFoldl f base xs = foldr (\x y -> f y x) base $ reverse xs
+
 --------------------------------------------------------------------------------------
 -- ***********************************************************************************
 --------------------------------------------------------------------------------------
 -- Exercise 04: Finding primes
 sieveSundaram :: Integer -> [Integer]
-sieveSundaram n = [1..n]
+sieveSundaram n = map (\x -> 2*x + 1) $ filter (\x -> notElem x sieveNumbers) [1..n]
+    where sieveNumbers = map (\(i, j) -> i+j+2*i*j) $ filter (\(i,j) -> i < j) $ cartProd [1..n] [1..n]
 
 cartProd :: [a] -> [b] -> [(a, b)]
 cartProd xs ys = [(x, y) | x <- xs, y <- ys]
