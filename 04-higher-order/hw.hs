@@ -26,14 +26,16 @@ data Tree a = Leaf
   deriving (Show, Eq)
 
 foldTree :: (Eq a) => [a] -> Tree a
-foldTree xs = foldr insert Leaf xs
-
-insert :: (Eq a) => a -> Tree a -> Tree a
-insert a Leaf = Node 0 Leaf a Leaf
-insert a (Node h l b r)
-   | a == b                  = Node h l b r
-   | (height l) < (height r) = (Node (h+1) (insert a l) b r)
-   | otherwise               = (Node (h+1) l b (insert a r))
+foldTree = foldr insert Leaf
+    where insert :: a -> Tree a -> Tree a
+          insert n Leaf = Node 0 Leaf n Leaf
+          insert n (Node _ left val right)
+              | height left <= height right =
+                let new_left = insert n left
+                in Node (height new_left + 1) (insert n left) val right
+              | otherwise =
+                let new_right = insert n right
+                in Node (height new_right + 1) left val (insert n right)
 
 height :: Tree a -> Integer
 height Leaf           = -1
